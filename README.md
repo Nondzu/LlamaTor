@@ -1,6 +1,6 @@
 # Welcome to LlamaTor
 
-![LlamaTor Version](https://img.shields.io/badge/version-0.0.0-blue.svg?cacheSeconds=2592000)
+![LlamaTor Version](https://img.shields.io/badge/version-0.0.46-blue.svg?cacheSeconds=2592000)
 
 LlamaTor is a community-driven project that provides a decentralized, efficient, and user-friendly method for downloading AI models. This tool enables the creation and sharing of torrent files for AI models, leveraging the robustness of the BitTorrent protocol to ensure model distribution is not solely dependent on any centralized site.
 
