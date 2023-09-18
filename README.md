@@ -32,6 +32,8 @@ This will download all models listed in the `models.json` file into the specifie
 
 ## Torrent Files 
 
+[https://github.com/Nondzu/LlamaTor/tree/torrents](https://github.com/Nondzu/LlamaTor/tree/torrents/torrents)
+
 Torrent files can be found in the `torrents` directory within the `torrents` branch. You can switch to this branch using the following command:
 
 ```bash
