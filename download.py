@@ -1,74 +1,85 @@
 import os
-import threading
-import time
 import json
 import sys
-import subprocess
+import requests
+import argparse
+import logging
+import datetime
+from tqdm import tqdm
+import signal
 
-# Global flag that all threads can check
-should_exit = False
+# Create the parser
+parser = argparse.ArgumentParser(description="Download models from Hugging Face's model hub.")
+# Add the arguments
+parser.add_argument('--output_folder', type=str, required=True, help='The folder where the models will be saved.')
+parser.add_argument('--models_file', type=str, required=True, help='The JSON file containing the models to download.')
+parser.add_argument('--timeout', type=int, default=30, help='The timeout for the download process (in seconds).')
+parser.add_argument('--verbose', action='store_true', help='Enable verbose output.')
+# Parse the arguments
+args = parser.parse_args()
 
-def get_folder_size(start_path='.'):
-    total_size = 0
-    for dirpath, dirnames, filenames in os.walk(start_path):
-        for f in filenames:
-            fp = os.path.join(dirpath, f)
-            if not os.path.islink(fp):
-                total_size += os.path.getsize(fp)
-    return total_size
+def download_file(file_url, file_path, logger):
+    response = None
+    try:
+        response = requests.get(file_url, allow_redirects=True, timeout=args.timeout, stream=True)
+        if response.status_code == 200:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)  # create the folder if it does not exist
+            with open(file_path, 'wb') as f:
+                total_size = int(response.headers.get('content-length', 0))
+                logger.info(f"Downloading file {file_path} ({total_size/ 1e6} Mbytes)")
+                with tqdm(total=total_size, unit='B', unit_scale=True, unit_divisor=1024, desc=file_path, miniters=1, file=sys.stdout) as t:
+                    for data in response.iter_content(chunk_size=4096):
+                        f.write(data)
+                        t.update(len(data))
+    except Exception as e:
+        logger.error(f"Error downloading {file_url}: {e}")
 
-def check_folder_size(folder):
-    global should_exit
-    while not should_exit:
-        try:
-            size = get_folder_size(folder)
-            print(f'Current size of {folder}: {size / 1024**3:.2f} GB')
-            time.sleep(20)  # check every 5 seconds
-        except Exception as e:
-            print(f"Error checking size: {e}")
-            break
+def signal_handler(sig, frame):
+    logging.info("Interrupted by user. Exiting...")
+    sys.exit(0)
 
-# Load models from JSON file
-with open('models.json', 'r') as f:
-    models = json.load(f)
+def main():
+    # Load models from JSON file
+    try:
+        with open(args.models_file, 'r') as f:
+            models = json.load(f)
+    except FileNotFoundError:
+        logging.error(f"Models file {args.models_file} not found.")
+        sys.exit(1)
 
-# Set output folder
-output_folder = "/media/kamil/bfd0f237-f145-47c7-8cc9-6c103587f2f6/models"  # replace this with your desired output folder
-
-try:
     # Check if there are any models
     if models:
         # Get the models
         for model in models:
-            creator = model['creator']
-            repo = model['repo']
-            model_name = f"{creator}/{repo}"
-            output_dir = f"{output_folder}/{model_name}"  # specify the folder where you want to save the model
+            model_name = model['name']
+            dir_name = model_name.replace('/', '_')  # replace '/' with '_'
+            output_dir = os.path.join(args.output_folder, dir_name)  # specify the folder where you want to save the model
 
-            # Check if the model has already been downloaded
-            if os.path.exists(output_dir):
-                print(f"{model_name} has already been downloaded.")
-                continue
-
-            # Create directory if it doesn't exist
-            os.makedirs(output_dir, exist_ok=True)
-
-            # Start a new thread to check the size of the output folder
-            threading.Thread(target=check_folder_size, args=(output_dir,), daemon=True).start()
-
-            # Clone the repository
-            print(f"Cloning {model_name} into {output_dir}...")
-            process = subprocess.Popen(f"git lfs clone https://huggingface.co/{model_name} {output_dir}", shell=True)
-            while process.poll() is None:  # While process is still running
-                if should_exit:
-                    process.terminate()  # If should_exit is True, terminate the process
-                    break
-                time.sleep(0.1)  # Check every 100 ms
-            print(f"Finished cloning {model_name}.")
+            # Set up logging for this model
+            logger = logging.getLogger(model_name)
+            logger.setLevel(logging.INFO)
+            log_dir = 'logs'
+            os.makedirs(log_dir, exist_ok=True)
+            current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            file_handler = logging.FileHandler(os.path.join(log_dir, f"{model_name.replace('/', '_')}_{current_time}.log"))
+            stream_handler = logging.StreamHandler()  # This handler will print messages to the console
+            formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+            file_handler.setFormatter(formatter)
+            stream_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+            logger.addHandler(stream_handler)
+            # Download the files
+            for branch in model['branches']:
+                for file in branch['files']:
+                    file_url = f"https://huggingface.co/{model_name}/resolve/{branch['name']}/{file}"
+                    file_path = os.path.join(output_dir, branch['name'], file)
+                    if os.path.exists(file_path):
+                        logger.info(f"File {file_path} already exists. Skipping...")
+                        continue
+                    download_file(file_url, file_path, logger)
     else:
-        print("No models found.")
-except KeyboardInterrupt:
-    print("\nStopping script...")
-    should_exit = True  # Set the flag to signal all threads to exit
-    time.sleep(1)  # Give threads a chance to notice
-    sys.exit()
+        logging.info("No models found.")
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    main()

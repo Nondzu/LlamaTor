@@ -6,8 +6,9 @@ LlamaTor is a community-driven project that provides a decentralized, efficient,
 
 ## Features
 
-- Generate a JSON file with the structure of AI models using `generate.py`  
-- Download all models from a JSON list using one script `download.py`. Next, using qbittorrent, you can generate torrent files.
+- Generate a JSON file with the structure of AI models using `generate.py`
+- Download all models from a JSON list using `download.py`
+- Generate torrent files for downloaded models using `make_torrent.py`
 
 ## Usage
 ### Generate a JSON file with the structure of AI models
@@ -30,17 +31,22 @@ python download.py --output_folder /media/user/models/ --models_file ./models.js
 
 This will download all models listed in the `models.json` file into the specified output folder.
 
-## Torrent Files 
+### Generate torrent files
+
+3. Run the `make_torrent.py` script to generate torrent files for the downloaded models:
+
+```python
+python make_torrent.py --input_folder /path/to/input/folder --output_folder /path/to/output/folder
+```
+
+Replace `/path/to/input/folder` with the path to the folder containing the downloaded models, and `/path/to/output/folder` with the path to the folder where you want to save the generated torrent files.
+
+The script will process each folder in the input folder, create a torrent file for it, and save the torrent file in the output folder. It uses a list of predefined trackers and a 4MB piece size for the torrent files.
+
+After running the script, you can find the generated torrent files in the output folder. You can then share these torrent files with others to distribute the models using the BitTorrent protocol.
 
 [https://github.com/Nondzu/LlamaTor/tree/torrents](https://github.com/Nondzu/LlamaTor/tree/torrents/torrents)
 
-Torrent files can be found in the `torrents` directory within the `torrents` branch. You can switch to this branch using the following command:
-
-```bash
-git checkout torrents
-```
-
-TODO: Create a script that will generate a torrent file after downloading a model.
 
 ## Contributing
 

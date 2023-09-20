@@ -60,7 +60,7 @@ def main():
         repo_table.append(repo_data)
 
     print("Writing data to models.json")
-    with open('models-Airoboros.json', 'w') as f:
+    with open('models.json', 'w') as f:
         json.dump(repo_table, f, indent=4)
 
     print("Done!")
