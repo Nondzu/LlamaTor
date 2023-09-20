@@ -6,8 +6,9 @@ LlamaTor is a community-driven project that provides a decentralized, efficient,
 
 ## Features
 
-- Generate a JSON file with the structure of AI models using `generate.py`  
-- Download all models from a JSON list using one script `download.py`. Next, using qbittorrent, you can generate torrent files.
+- Generate a JSON file with the structure of AI models using `generate.py`
+- Download all models from a JSON list using `download.py`
+- Generate torrent files for downloaded models using `make_torrent.py`
 
 ## Usage
 ### Generate a JSON file with the structure of AI models
@@ -30,15 +31,15 @@ python download.py --output_folder /media/user/models/ --models_file ./models.js
 
 This will download all models listed in the `models.json` file into the specified output folder.
 
-## Torrent Files 
+### Generate torrent files
 
-Torrent files can be found in the `torrents` directory within the `torrents` branch. You can switch to this branch using the following command:
+3. Run the `make_torrent.py` script to generate torrent files for the downloaded models:
 
-```bash
-git checkout torrents
+```python
+generate_torrents("/path/to/input/folder", "/path/to/output/folder")
 ```
 
-TODO: Create a script that will generate a torrent file after downloading a model.
+Replace `/path/to/input/folder` with the path to the folder containing the downloaded models, and `/path/to/output/folder` with the path to the folder where you want to save the generated torrent files.
 
 ## Contributing
 

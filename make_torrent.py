@@ -1,6 +1,7 @@
 import os
 import subprocess
 import time
+import argparse
 
 def generate_torrents(input_folder, output_folder):
     trackers = [
@@ -42,5 +43,10 @@ def generate_torrents(input_folder, output_folder):
 
     print(f"Total time taken: {end_time - start_time} seconds")
 
-# Usage
-generate_torrents("/home/kamil/ml/models/WizardLM", "/home/kamil/app/wi1")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate torrent files for AI models.")
+    parser.add_argument('--input_folder', type=str, required=True, help='The folder containing the downloaded models.')
+    parser.add_argument('--output_folder', type=str, required=True, help='The folder where the generated torrent files will be saved.')
+    args = parser.parse_args()
+
+    generate_torrents(args.input_folder, args.output_folder)
