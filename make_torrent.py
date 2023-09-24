@@ -2,8 +2,9 @@ import os
 import subprocess
 import time
 import argparse
+import fnmatch
 
-def generate_torrents(input_folder, output_folder):
+def generate_torrents(input_folder, output_folder, filter_pattern="*AWQ*"):
     trackers = [
         "http://atrack.pow7.com/announce",
         "udp://explodie.org:6969/announce",
@@ -17,14 +18,15 @@ def generate_torrents(input_folder, output_folder):
         "http://tracker.opentrackr.org:1337/announce"
     ]
 
-    folders = [f for f in os.listdir(input_folder) if os.path.isdir(os.path.join(input_folder, f))]
+    folders = [f for f in os.listdir(input_folder) if os.path.isdir(os.path.join(input_folder, f)) and fnmatch.fnmatch(f, filter_pattern)]
     total_folders = len(folders)
+
 
     start_time = time.time()
 
     for i, folder in enumerate(folders, start=1):
         output_file = os.path.join(output_folder, f"{folder}.torrent")
-        command = ["mktorrent", "-l", "22", "-p", "-o", output_file]
+        command = ["mktorrent", "-l", "19", "-p", "-o", output_file]
 
         for tracker in trackers:
             command.extend(["-a", tracker])
@@ -47,6 +49,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate torrent files for AI models.")
     parser.add_argument('--input_folder', type=str, required=True, help='The folder containing the downloaded models.')
     parser.add_argument('--output_folder', type=str, required=True, help='The folder where the generated torrent files will be saved.')
+    parser.add_argument('--filter', type=str, default="*", help="Filter pattern for folder names (e.g., *AWQ*). If you want to create torrents for all folders, leave this blank.")
     args = parser.parse_args()
 
-    generate_torrents(args.input_folder, args.output_folder)
+    generate_torrents(args.input_folder, args.output_folder, filter_pattern=args.filter)
