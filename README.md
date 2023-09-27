@@ -52,7 +52,7 @@ python make_torrent.py --input_folder /path/to/input/folder --output_folder /pat
 
 Replace `/path/to/input/folder` with the path to the folder containing the downloaded models, and `/path/to/output/folder` with the path to the folder where you want to save the generated torrent files.
 
-The script processes each folder in the input folder, creates a torrent file for it, and saves the torrent file in the output folder. It uses a list of predefined trackers and a 4MB piece size for the torrent files.
+The script processes each folder in the input folder, creates a torrent file for it, and saves the torrent file in the output folder. It uses a list of predefined trackers and a 512KB piece size for the torrent files.
 
 After running the script, you can find the generated torrent files in the output folder. Share these torrent files with others to distribute the AI models using the BitTorrent protocol.
 
@@ -67,6 +67,7 @@ LlamaTor is a community-driven project, and we value your contributions. If you 
 1. **Seed Torrents:** After downloading a model, keep your torrent client open so that others can download from you. The more seeders, the faster the download speed for everyone.
 2. **Add or Build Your Own Seedbox:** If you have a seedbox, consider adding it to the network to increase download speeds and reliability.
 3. **Donate:** Keeping seedboxes online and renting more storage costs money. Any donations to support this project are greatly appreciated.
+4. **Spread the Word:** Share information about the LlamaTor project with your friends, colleagues, and social media networks. Raising awareness about the project helps to grow the community and attract more contributors, ultimately benefiting everyone involved.
 
 ## License
 
