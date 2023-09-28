@@ -80,6 +80,36 @@ def main():
     else:
         logging.info("No models found.")
 
+
+def download_repository(repo):
+    model_name = repo['name']
+    dir_name = model_name.replace('/', '_')  # replace '/' with '_'
+    output_dir = os.path.join(args.output_folder, dir_name)  # specify the folder where you want to save the model
+
+    # Set up logging for this model
+    logger = logging.getLogger(model_name)
+    logger.setLevel(logging.INFO)
+    log_dir = 'logs'
+    os.makedirs(log_dir, exist_ok=True)
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    file_handler = logging.FileHandler(os.path.join(log_dir, f"{model_name.replace('/', '_')}_{current_time}.log"))
+    stream_handler = logging.StreamHandler()  # This handler will print messages to the console
+    formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    file_handler.setFormatter(formatter)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+
+    # Download the files
+    for branch in repo['branches']:
+        for file in branch['files']:
+            file_url = f"https://huggingface.co/{model_name}/resolve/{branch['name']}/{file}"
+            file_path = os.path.join(output_dir, branch['name'], file)
+            if os.path.exists(file_path):
+                logger.info(f"File {file_path} already exists. Skipping...")
+                continue
+            download_file(file_url, file_path, logger)
+
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     main()
