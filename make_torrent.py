@@ -26,7 +26,7 @@ def generate_torrents(input_folder, output_folder, filter_pattern="*AWQ*"):
 
     for i, folder in enumerate(folders, start=1):
         output_file = os.path.join(output_folder, f"{folder}.torrent")
-        command = ["mktorrent", "-l", "19", "-p", "-o", output_file]
+        command = ["mktorrent", "-l", "19", "-o", output_file]
 
         for tracker in trackers:
             command.extend(["-a", tracker])

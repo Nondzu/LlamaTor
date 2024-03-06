@@ -42,7 +42,8 @@ class ModelProcessor:
         repo_table = []
         for model in tqdm(filtered_models, desc="Processing models"):
             try:
-                last_modified = parse(model.lastModified).date()
+                last_modified_str = model.lastModified if isinstance(model.lastModified, str) else model.lastModified.strftime('%Y-%m-%dT%H:%M:%SZ')
+                last_modified = parse(last_modified_str).date()
                 if (now - last_modified).days > self.args.age:
                     print(
                         f"Removed outdated repo: {(model.modelId)} : last update: {last_modified}"
@@ -57,7 +58,8 @@ class ModelProcessor:
                 }
                 git_refs = self.api.list_repo_refs(model.modelId, repo_type="model")
                 branches = [b for b in git_refs.branches if not b.name.startswith(".git")]
-                repo_data["last_update"] = model.lastModified
+                repo_data["last_update"] = model.lastModified.strftime('%Y-%m-%dT%H:%M:%SZ')
+
                 non_empty_branch_found = False
                 for branch in branches:
                     try:
